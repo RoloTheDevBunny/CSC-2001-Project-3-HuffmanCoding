@@ -35,6 +35,14 @@ public class Huffman {
     public static int[] cntFreq(String filename) throws IOException {
         int[] freq = new int[NUM_CHARS];
         // TODO: implement
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String line = reader.readLine();
+        while (line != null) {
+            for (char c :  line.toCharArray()) {
+                freq[c]++;
+            }
+            line = reader.readLine();
+        }
         return freq;
     }
 
@@ -50,6 +58,7 @@ public class Huffman {
      */
     public static void addNode(Collection<HuffmanNode> collection, HuffmanNode node) {
         // TODO: implement
+        collection.add(node);
     }
 
     /**
@@ -63,8 +72,21 @@ public class Huffman {
      * minimum node and remove it.
      */
     public static HuffmanNode removeMin(Collection<HuffmanNode> collection) {
-        // TODO: implement
-        return null;
+            if (collection instanceof PriorityQueue queue) {
+                return queue.removeMin();
+            }
+
+            HuffmanNode min = null;
+            for (HuffmanNode node : collection) {
+                if (min == null || node.compareTo(min) < 0) {
+                    min = node;
+                }
+            }
+
+            if (min != null) {
+                collection.remove(min);
+            }
+            return min;
     }
 
     /**
@@ -85,6 +107,8 @@ public class Huffman {
      */
     public static HuffmanNode createHuffTree(int[] freq) {
         // TODO: implement
+
+        PriorityQueue heap = new PriorityQueue(freq.length);
         return null;
     }
 

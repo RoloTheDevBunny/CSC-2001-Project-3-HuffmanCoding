@@ -31,7 +31,11 @@ public record HuffmanNode(int charAscii, int freq, HuffmanNode left, HuffmanNode
      */
     public static boolean comesBefore(HuffmanNode a, HuffmanNode b) {
         // TODO: implement
-        return false;
+        if (a.freq != b.freq) {
+            return a.freq < b.freq;
+        } else {
+            return a.charAscii < b.charAscii;
+        }
     }
 
     /**
@@ -44,8 +48,12 @@ public record HuffmanNode(int charAscii, int freq, HuffmanNode left, HuffmanNode
      * of a's and b's charAscii values (used to break ties later on).
      */
     public static HuffmanNode combine(HuffmanNode a, HuffmanNode b) {
-        // TODO: implement
-        return null;
+        if (comesBefore(a, b)) {
+            HuffmanNode temp = b;
+            b = a;
+            a = temp;
+        }
+        return new HuffmanNode(Math.min(a.charAscii, b.charAscii), a.freq + b.charAscii, a, b);
     }
 
     /**

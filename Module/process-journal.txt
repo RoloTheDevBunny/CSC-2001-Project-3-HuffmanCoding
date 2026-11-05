@@ -15,4 +15,7 @@
     - Used try for writing so it actually updates the output file
     - I had 2 bugs that caused my test cases to fail, both of which were in HuffmanNode.combine
 11/04/2026 Evening:
-    - Flooded HuffmanTest with cases to cover every line to meet the gradescope requirements
+    - Wanted to replace my repetitive test cases with a type of loop, found parametarized tests
+    - Added test cases to cover every line to meet the gradescope requirements
+    - Went back through the pdf to make sure I covered everything
+    - Had some weird cases with Windows new lines since I moved the demo files, although that should be fixed

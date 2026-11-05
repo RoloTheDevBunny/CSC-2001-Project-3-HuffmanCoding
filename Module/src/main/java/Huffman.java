@@ -35,12 +35,9 @@ public class Huffman {
     public static int[] cntFreq(String filename) throws IOException {
         int[] freq = new int[NUM_CHARS];
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line = reader.readLine();
-            while (line != null) {
-                for (char c :  line.toCharArray()) {
-                    freq[c]++;
-                }
-                line = reader.readLine();
+            int ascii;
+            while ((ascii = reader.read()) != -1) {
+                freq[ascii]++;
             }
         }
         return freq;
@@ -231,14 +228,9 @@ public class Huffman {
 
             String[] key = createCode(root);
 
-            String line = reader.readLine();
-            while (line != null) {
-                StringBuilder newLine = new StringBuilder();
-                for (char c : line.toCharArray()) {
-                    newLine.append(key[c]);
-                }
-                writer.write(newLine.toString());
-                line = reader.readLine();
+            int ascii;
+            while ((ascii = reader.read()) != -1) {
+                writer.write(key[ascii]);
             }
         }
     }
@@ -252,6 +244,10 @@ public class Huffman {
      */
     public static int[] parseHeader(String headerString) {
         int[] freq = new int[NUM_CHARS];
+
+        if (headerString == null || headerString.trim().isEmpty()) {
+            return freq;
+        }
 
         String[] parts = headerString.trim().split("\\s+");
 
@@ -281,23 +277,23 @@ public class Huffman {
         try (BufferedReader reader = new BufferedReader(new FileReader(encodedFile));
              BufferedWriter writer = new BufferedWriter(new FileWriter(decodeFile))) {
             String line = reader.readLine();
-            String[] parts = line.trim().split("\\s+");
-            if (parts.length < 2) {
+            if (line == null || line.isEmpty()) {
                 writer.write("");
                 return;
-            } else if (parts.length == 2) {
+            }
+            String[] parts = line.trim().split("\\s+");
+            if (parts.length == 2) {
                 char letter = (char) Integer.parseInt(parts[0]);
+                // had some fun repeatedly following the IDE suggestions:
                 writer.write(String.valueOf(letter).repeat(Math.max(0, Integer.parseInt(parts[1]))));
+                return;
             }
 
             int[] freq = parseHeader(line);
 
             HuffmanNode root = createHuffTree(freq);
 
-            line = reader.readLine();
-            while (line != null) {
-                StringBuilder newLine = new StringBuilder();
-
+            while ((line = reader.readLine()) != null) {
                 HuffmanNode node = root;
 
                 for (char bit : line.toCharArray()) {
@@ -312,9 +308,6 @@ public class Huffman {
                         node = root;
                     }
                 }
-
-                writer.write(newLine.toString());
-                line = reader.readLine();
             }
         }
     }

@@ -1,0 +1,18 @@
+10/28/2026 In Class:
+    - Cloned the repository
+    - Wrote HuffmanNode methods (quite poorly though, had bugs)
+11/04/2026 In Class:
+    - Decided on using a PriorityQueue
+    - Attempted to use my existing implementation, although I did not want to implement the entire Collection
+    - Deleted my PriorityQueue file and use the generic PriorityQueue in Java
+    - Wrote the upper portion of Huffman methods
+11/04/2026 Afternoon:
+    - Finished the main Huffman methods near the end.
+    - Researched the regex for doing String.split(" ") when decoding header tokens
+    - Decided to use the built-in Double Ended Queues as a Stack
+    - Had some issues with reading files not working right
+    - Updated file paths in HuffmanTest
+    - Used try for writing so it actually updates the output file
+    - I had 2 bugs that caused my test cases to fail, both of which were in HuffmanNode.combine
+11/04/2026 Evening:
+    - Flooded HuffmanTest with cases to cover every line to meet the gradescope requirements

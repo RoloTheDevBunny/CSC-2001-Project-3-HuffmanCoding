@@ -15,9 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class HuffmanTest {
 
+    private static final String TEST_FILES = "";
+
     @Test
     public void testCntFreq() throws IOException {
-        int[] freqList = Huffman.cntFreq("file2.txt");
+        int[] freqList = Huffman.cntFreq(TEST_FILES + "file2.txt");
         int[] ansList = {2, 4, 8, 16, 0, 2, 0}; // counts for ascii 97..103
         for (int i = 0; i < ansList.length; i++) {
             assertEquals(ansList[i], freqList[97 + i], "mismatch at ascii " + (97 + i));
@@ -34,14 +36,24 @@ public class HuffmanTest {
 
     @Test
     public void testCreateHeader() throws IOException {
-        int[] freqList = Huffman.cntFreq("file2.txt");
+        int[] freqList = Huffman.cntFreq(TEST_FILES + "file2.txt");
         assertEquals("97 2 98 4 99 8 100 16 102 2", Huffman.createHeader(freqList));
     }
 
     @Test
     public void test01Textfile() throws IOException {
-        Huffman.huffmanEncode("file1.txt", "file1_out.txt");
-        assertTrue(compareFiles("file1_out.txt", "file1_soln.txt"));
+        Huffman.huffmanEncode(TEST_FILES + "file1.txt", TEST_FILES + "file1_out.txt");
+        assertTrue(compareFiles(TEST_FILES + "file1_out.txt", TEST_FILES + "file1_soln.txt"));
+    }
+    @Test
+    public void test02Textfile() throws IOException {
+        Huffman.huffmanEncode(TEST_FILES + "file2.txt", TEST_FILES + "file2_out.txt");
+        assertTrue(compareFiles(TEST_FILES + "file2_out.txt", TEST_FILES + "file2_soln.txt"));
+    }
+    @Test
+    public void testMultiLineTextfile() throws IOException {
+        Huffman.huffmanEncode(TEST_FILES + "multiline.txt", TEST_FILES + "multiline_out.txt");
+        assertTrue(compareFiles(TEST_FILES + "multiline_out.txt", TEST_FILES + "multiline_soln.txt"));
     }
 
     /**

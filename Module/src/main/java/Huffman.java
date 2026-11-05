@@ -34,14 +34,14 @@ public class Huffman {
      */
     public static int[] cntFreq(String filename) throws IOException {
         int[] freq = new int[NUM_CHARS];
-        // TODO: implement
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-        String line = reader.readLine();
-        while (line != null) {
-            for (char c :  line.toCharArray()) {
-                freq[c]++;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line = reader.readLine();
+            while (line != null) {
+                for (char c :  line.toCharArray()) {
+                    freq[c]++;
+                }
+                line = reader.readLine();
             }
-            line = reader.readLine();
         }
         return freq;
     }
@@ -72,21 +72,20 @@ public class Huffman {
      * minimum node and remove it.
      */
     public static HuffmanNode removeMin(Collection<HuffmanNode> collection) {
-            if (collection instanceof PriorityQueue queue) {
-                return queue.removeMin();
-            }
+        if (collection instanceof PriorityQueue<HuffmanNode> pq) {
+            return pq.poll();
+        }
 
-            HuffmanNode min = null;
-            for (HuffmanNode node : collection) {
-                if (min == null || node.compareTo(min) < 0) {
-                    min = node;
-                }
+        HuffmanNode min = null;
+        for (HuffmanNode node : collection) {
+            if (min == null || node.compareTo(min) < 0) {
+                min = node;
             }
-
-            if (min != null) {
-                collection.remove(min);
-            }
-            return min;
+        }
+        if (min != null) {
+            collection.remove(min);
+        }
+        return min;
     }
 
     /**
@@ -108,8 +107,30 @@ public class Huffman {
     public static HuffmanNode createHuffTree(int[] freq) {
         // TODO: implement
 
-        PriorityQueue heap = new PriorityQueue(freq.length);
-        return null;
+        PriorityQueue<HuffmanNode> pq = new PriorityQueue<>();
+
+        for (int i = 0; i < 256; i++) {
+            int count = freq[i];
+            if (count > 0) {
+                addNode(pq, new HuffmanNode(i, count));
+            }
+        }
+        if (pq.isEmpty()) {
+            return null;
+        }
+
+        if (pq.size() == 1) {
+            return pq.iterator().next();
+        }
+
+        while (pq.size() >= 2) {
+            HuffmanNode node1 = removeMin(pq);
+            HuffmanNode node2 = removeMin(pq);
+
+            addNode(pq, HuffmanNode.combine(node1, node2));
+        }
+
+        return removeMin(pq);
     }
 
     /**
@@ -128,6 +149,35 @@ public class Huffman {
         String[] codes = new String[NUM_CHARS];
         Arrays.fill(codes, "");
         // TODO: implement
+
+        if (root == null) {
+            return codes;
+        }
+        Deque<HuffmanNode> nodeStack = new ArrayDeque<>();
+        Deque<String> codeStack = new ArrayDeque<>();
+
+        nodeStack.push(root);
+        codeStack.push("");
+
+        while (!nodeStack.isEmpty()) {
+            HuffmanNode node = nodeStack.pop();
+            String code = codeStack.pop();
+
+            if (node.isLeaf()) {
+                codes[node.charAscii()] = code;
+            } else {
+                if (node.right() != null) {
+                    nodeStack.push(node.right());
+                    codeStack.push(code + "1");
+                }
+
+                if (node.left() != null) {
+                    nodeStack.push(node.left());
+                    codeStack.push(code + "0");
+                }
+            }
+        }
+
         return codes;
     }
 
@@ -141,7 +191,16 @@ public class Huffman {
      */
     public static String createHeader(int[] freq) {
         // TODO: implement
-        return "";
+        StringBuilder s = new StringBuilder();
+        for (int i=0; i<NUM_CHARS; i++) {
+            if (freq[i] == 0) continue;
+            s.append(i).append(" ").append(freq[i]).append(" ");
+        }
+        if (!s.isEmpty()) {
+            s.setLength(s.length() - 1);
+        }
+
+        return s.toString();
     }
 
     /**
@@ -158,7 +217,30 @@ public class Huffman {
      *    header line (e.g. "97 5") and nothing else - no second line of code bits.
      */
     public static void huffmanEncode(String inFile, String outFile) throws IOException {
-        // TODO: implement
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+             BufferedReader reader = new BufferedReader(new FileReader(inFile))) {
+            int[] freq = cntFreq(inFile);
+
+            writer.write(createHeader(freq));
+
+            HuffmanNode root = createHuffTree(freq);
+            if (root == null || (root.right() == null && root.left() == null)) {
+                return;
+            }
+            writer.write('\n');
+
+            String[] key = createCode(root);
+
+            String line = reader.readLine();
+            while (line != null) {
+                StringBuilder newLine = new StringBuilder();
+                for (char c : line.toCharArray()) {
+                    newLine.append(key[c]);
+                }
+                writer.write(newLine.toString());
+                line = reader.readLine();
+            }
+        }
     }
 
     /**
@@ -170,7 +252,13 @@ public class Huffman {
      */
     public static int[] parseHeader(String headerString) {
         int[] freq = new int[NUM_CHARS];
-        // TODO: implement
+
+        String[] parts = headerString.trim().split("\\s+");
+
+        for (int i=0; i<parts.length; i+=2) {
+            freq[Integer.parseInt(parts[i])] = Integer.parseInt(parts[i+1]);
+        }
+
         return freq;
     }
 
@@ -190,6 +278,44 @@ public class Huffman {
      * so write it out that many times directly.
      */
     public static void huffmanDecode(String encodedFile, String decodeFile) throws IOException {
-        // TODO: implement
+        try (BufferedReader reader = new BufferedReader(new FileReader(encodedFile));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(decodeFile))) {
+            String line = reader.readLine();
+            String[] parts = line.trim().split("\\s+");
+            if (parts.length < 2) {
+                writer.write("");
+                return;
+            } else if (parts.length == 2) {
+                char letter = (char) Integer.parseInt(parts[0]);
+                writer.write(String.valueOf(letter).repeat(Math.max(0, Integer.parseInt(parts[1]))));
+            }
+
+            int[] freq = parseHeader(line);
+
+            HuffmanNode root = createHuffTree(freq);
+
+            line = reader.readLine();
+            while (line != null) {
+                StringBuilder newLine = new StringBuilder();
+
+                HuffmanNode node = root;
+
+                for (char bit : line.toCharArray()) {
+                    if (bit == '0') {
+                        node = node.left();
+                    } else if (bit == '1') {
+                        node = node.right();
+                    }
+
+                    if (node.isLeaf()) {
+                        writer.write(node.charAscii());
+                        node = root;
+                    }
+                }
+
+                writer.write(newLine.toString());
+                line = reader.readLine();
+            }
+        }
     }
 }
